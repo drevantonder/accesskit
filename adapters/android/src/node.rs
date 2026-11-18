@@ -365,6 +365,17 @@ impl NodeWrapper<'_> {
         )
         .unwrap();
 
+        // A heading, which TalkBack moves between by its headings navigation. `setHeading` is from API 28.
+        if self.0.role() == Role::Heading
+            && env
+                .get_static_field("android/os/Build$VERSION", "SDK_INT", "I")
+                .and_then(|sdk| sdk.i())
+                .is_ok_and(|sdk| sdk >= 28)
+        {
+            env.call_method(node_info, "setHeading", "(Z)V", &[true.into()])
+                .unwrap();
+        }
+
         let can_focus = self.is_focusable() && !self.0.is_focused();
         // Without a click action, TalkBack handles a double-tap on a range
         // control by tapping its center which can be useful to quickly
